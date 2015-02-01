@@ -32,5 +32,6 @@ BLD_WEAVE() {
   ln -sf "$WEAVE_DIR/weave" "$GOPATH/bin"
 }
 
-PACKAGES+=(WEAVE_DEPS
-           WEAVE)
+PACKAGES=("${PACKAGES[@]}"
+          WEAVE_DEPS
+          WEAVE)
