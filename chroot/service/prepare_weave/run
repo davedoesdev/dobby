@@ -7,6 +7,7 @@ if grep -q 'heddle_prepare=1' /proc/cmdline; then
   fi
 else
   exec 2>&1
+  exec sv down prepare_weave
 fi
 set -e
 
@@ -29,5 +30,5 @@ fi
 cd "$GOPATH/src/github.com/weaveworks/weave"
 docker load -i alpine.tar
 CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO=
-rm -f *.tar weaveexec/*.tgz
+rm -f weave*.tar
 # we'll be restarted and check for the images again
