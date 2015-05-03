@@ -1,6 +1,10 @@
 #!/bin/sh
 if grep -q 'heddle_prepare=1' /proc/cmdline; then
-  exec > /dev/ttyS0 2>&1
+  if [ -c /dev/ttyAMA0 ]; then
+    exec > /dev/ttyAMA0 2>&1
+  else
+    exec > /dev/ttyS0 2>&1
+  fi
 else
   exec 2>&1
 fi
@@ -14,13 +18,16 @@ docker info
 docker history scratch
 
 # check if weave images exist
-if docker history zettio/weave && docker history zettio/weavedns; then
+if docker history weaveworks/weave && \
+   docker history weaveworks/weavedns && \
+   docker history weaveworks/weaveexec; then
   echo weave images exist
   exec sv down prepare_weave
 fi
 
 # make weave images
-cd "$GOPATH/src/github.com/zettio/weave"
+cd "$GOPATH/src/github.com/weaveworks/weave"
+docker load -i alpine.tar
 CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO=
-rm -f /var/tmp/weave*.tar
+rm -f *.tar weaveexec/*.tgz
 # we'll be restarted and check for the images again

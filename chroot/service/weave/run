@@ -1,6 +1,6 @@
 #!/bin/sh
 exec 2>&1
 set -e
-docker history zettio/weave
+docker history weaveworks/weave
 weave launch
 exec docker wait weave
