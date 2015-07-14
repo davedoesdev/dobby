@@ -2,5 +2,7 @@
 exec 2>&1
 set -e
 docker history weaveworks/weave
+docker history weaveworks/weavedns
+docker history weaveworks/weaveexec
 weave launch
 exec docker wait weave

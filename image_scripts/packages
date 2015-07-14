@@ -1,38 +1,31 @@
-export VER_WEAVE="0.10.0"
-
-DIR_WEAVE_DEPS="weave-deps-$VER_WEAVE"
-SRC_WEAVE_DEPS="$DIR_WEAVE_DEPS.tar.gz"
-GET_WEAVE_DEPS() {
-  mkdir -p "$DIR_WEAVE_DEPS/go"
-  wget "https://raw.githubusercontent.com/weaveworks/weave/v$VER_WEAVE/weaver/main.go"
-  GOPATH="$DIR_WEAVE_DEPS/go" go get -d -tags netgo .
-  rm -f main.go
-  wget "https://raw.githubusercontent.com/weaveworks/weave/v$VER_WEAVE/weavedns/main.go"
-  GOPATH="$DIR_WEAVE_DEPS/go" go get -d -tags netgo .
-  rm -f main.go
-  wget "https://raw.githubusercontent.com/weaveworks/weave/v$VER_WEAVE/sigproxy/main.go"
-  GOPATH="$DIR_WEAVE_DEPS/go" go get -d -tags netgo .
-  rm -f main.go
-  wget "https://raw.githubusercontent.com/weaveworks/weave/v$VER_WEAVE/Makefile"
+export VER_WEAVE="85b4a05c9a0fc9538ab3298e5bf0cf0630b93033"
+RPO_WEAVE="https://github.com/weaveworks/weave.git"
+DIR_WEAVE="weave-$VER_WEAVE"
+SRC_WEAVE="$DIR_WEAVE.tar.gz"
+GET_WEAVE() {
+  GOPATH="$PWD/$DIR_WEAVE"
+  d="$GOPATH/src/github.com/weaveworks"
+  mkdir -p "$d"
+  cd "$d"
+  git clone "$RPO_WEAVE"
+  cd weave
+  git checkout "$VER_WEAVE"
+  for x in weaver weavedns sigproxy weaveproxy weavewait netcheck; do
+    go get -d -tags netgo ./prog/$x
+  done
   cat >> Makefile << 'EOF'
 get_weave_deps: $(DOCKER_DISTRIB)
 EOF
-  ( cd "$DIR_WEAVE_DEPS"; mkdir weaveexec; make -f ../Makefile get_weave_deps ) 1>&2
-  rm -f Makefile
+  make get_weave_deps 1>&2
   docker pull gliderlabs/alpine:latest 1>&2
-  docker save -o "$DIR_WEAVE_DEPS/alpine.tar" gliderlabs/alpine:latest 1>&2
-  tar -zc "$DIR_WEAVE_DEPS"
+  docker save -o alpine.tar gliderlabs/alpine:latest 1>&2
+  tar -C "$GOPATH/.." -zc "$DIR_WEAVE"
 }
-BLD_WEAVE_DEPS() {
-  cp -af go/* "$GOPATH"
-}
-
-DIR_WEAVE="weave-$VER_WEAVE"
-SRC_WEAVE="$DIR_WEAVE.tar.gz"
-URL_WEAVE="https://github.com/weaveworks/weave/archive/v$VER_WEAVE.tar.gz"
-CHK_WEAVE="88c9679dca153b5c08151008dbc33e9da24dd40e1ec53f50b214c78962e8b85d"
-SUM_WEAVE="sha256"
 BLD_WEAVE() {
+  d="$GOPATH/src/github.com/weaveworks/weave"
+  rm -rf "$d"
+  cp -af * "$GOPATH"
+  cd "$d"
   patch -p0 << 'EOF'
 --- Makefile.orig
 +++ Makefile
@@ -42,23 +35,18 @@ BLD_WEAVE() {
  DOCKERHUB_USER=weaveworks
 -WEAVE_VERSION=git-$(shell git rev-parse --short=12 HEAD)
 +WEAVE_VERSION=$(VER_WEAVE)
- WEAVER_EXE=weaver/weaver
- WEAVEDNS_EXE=weavedns/weavedns
- SIGPROXY_EXE=sigproxy/sigproxy
+
+ WEAVER_EXE=prog/weaver/weaver
+ WEAVEDNS_EXE=prog/weavedns/weavedns
 EOF
-  WEAVE_DIR="$GOPATH/src/github.com/weaveworks/weave"
-  rm -rf "$WEAVE_DIR"
-  mkdir -p "$(dirname "$WEAVE_DIR")"
-  cp -a "$PWD" "$WEAVE_DIR"
-  cp -a "../$DIR_WEAVE_DEPS"/{*.tar,weaveexec} "$WEAVE_DIR"
-  cd "$WEAVE_DIR"
   go clean -i net
   go install -tags netgo std
   # We can't make the docker images themselves until we have docker running
-  CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO= weaver/weaver weavedns/weavedns sigproxy/sigproxy
-  ln -sf "$WEAVE_DIR/weave" "$GOPATH/bin"
+  CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO= \
+      prog/weaver/weaver prog/weavedns/weavedns prog/weaveproxy/weaveproxy \
+      prog/sigproxy/sigproxy prog/weavewait/weavewait prog/netcheck/netcheck
+  ln -sf "$d/weave" "$GOPATH/bin"
 }
 
 PACKAGES=("${PACKAGES[@]}"
-          WEAVE_DEPS
           WEAVE)
