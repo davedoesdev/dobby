@@ -3,7 +3,7 @@ RPO_WEAVE="https://github.com/weaveworks/weave.git"
 DIR_WEAVE="weave-$VER_WEAVE"
 SRC_WEAVE="$DIR_WEAVE.tar.gz"
 GET_WEAVE() {
-  GOPATH="$PWD/$DIR_WEAVE"
+  export GOPATH="$PWD/$DIR_WEAVE"
   d="$GOPATH/src/github.com/weaveworks"
   mkdir -p "$d"
   cd "$d"
