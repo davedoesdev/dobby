@@ -1,8 +1,5 @@
 #TODO
 
-*** Fold and Salt in dobby
-same for nfdhcpd, Fold
-# nfdhcpd
-# Fold - add dhcpcd -Z rules
-# Saltstack (inc ota updates)
+flock ebtables --concurrent ? concurrent for iptables/ip6tables?
 CI builds for dobby
+Saltstack (inc ota updates)

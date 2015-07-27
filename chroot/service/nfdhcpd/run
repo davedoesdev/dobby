@@ -1,0 +1,6 @@
+#!/bin/sh
+exec 2>&1
+set -e
+chgrp nfdhcpd /var/lib/nfdhcpd
+chmod g+rw,o= /var/lib/nfdhcpd
+exec nfdhcpd -f -c "$INSTALL_DIR/etc/nfdhcpd.conf" --debug
