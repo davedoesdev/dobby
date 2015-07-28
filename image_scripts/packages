@@ -454,7 +454,7 @@ BLD_EBTABLES() {
        "LIBDIR=$INSTALL_DIR/lib" install
 }
 
-VER_FOLD="e39f1515edbd4695cdefe76eb71d4decea511dc3"
+VER_FOLD="c119462750736256dd638ce70620db4bb3f95b21"
 RPO_FOLD="https://github.com/davedoesdev/fold.git"
 DIR_FOLD="fold-$VER_FOLD"
 SRC_FOLD="$DIR_FOLD.tar.gz"

@@ -1,5 +1,3 @@
 #TODO
-
-flock ebtables --concurrent ? concurrent for iptables/ip6tables?
 CI builds for dobby
 Saltstack (inc ota updates)
