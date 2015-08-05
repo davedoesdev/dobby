@@ -478,6 +478,176 @@ PST_FOLD() {
   export NFDHCPD_CFG="$INSTALL_DIR/etc/nfdhcpd.conf"
 }
 
+VER_LIBYAML="0.1.6"
+DIR_LIBYAML="yaml-$VER_LIBYAML"
+SRC_LIBYAML="$DIR_LIBYAML.tar.gz"
+URL_LIBYAML="http://pyyaml.org/download/libyaml/$SRC_LIBYAML"
+CHK_LIBYAML="7da6971b4bd08a986dd2a61353bc422362bd0edcc67d7ebaac68c95f74182749"
+SUM_LIBYAML="sha256"
+BLD_LIBYAML() {
+  ./configure "--prefix=$INSTALL_DIR"
+  make
+  make install
+}
+
+VER_PYYAML="3.11"
+DIR_PYYAML="PyYAML-$VER_PYYAML"
+SRC_PYYAML="$DIR_PYYAML.tar.gz"
+URL_PYYAML="http://pyyaml.org/download/pyyaml/$SRC_PYYAML"
+CHK_PYYAML="c36c938a872e5ff494938b33b14aaa156cb439ec67548fcab3535bb78b0846e8"
+SUM_PYYAML="sha256"
+BLD_PYYAML() {
+  python setup.py install
+}
+
+VER_MARKUPSAFE="0.23"
+DIR_MARKUPSAFE="MarkupSafe-$VER_MARKUPSAFE"
+SRC_MARKUPSAFE="$DIR_MARKUPSAFE.tar.gz"
+URL_MARKUPSAFE="https://pypi.python.org/packages/source/M/MarkupSafe/$SRC_MARKUPSAFE"
+CHK_MARKUPSAFE="a4ec1aff59b95a14b45eb2e23761a0179e98319da5a7eb76b56ea8cdc7b871c3"
+SUM_MARKUPSAFE="sha256"
+BLD_MARKUPSAFE() {
+  python setup.py install
+}
+
+VER_JINJA2="2.8"
+DIR_JINJA2="Jinja2-$VER_JINJA2"
+SRC_JINJA2="$DIR_JINJA2.tar.gz"
+URL_JINJA2="https://pypi.python.org/packages/source/J/Jinja2/$SRC_JINJA2"
+CHK_JINJA2="bc1ff2ff88dbfacefde4ddde471d1417d3b304e8df103a7a9437d47269201bf4"
+SUM_JINJA2="sha256"
+BLD_JINJA2() {
+  python setup.py install
+}
+
+VER_MSGPACK_PYTHON="0.1.12"
+DIR_MSGPACK_PYTHON="msgpack-python-$VER_MSGPACK_PYTHON"
+SRC_MSGPACK_PYTHON="$DIR_MSGPACK_PYTHON.tar.gz"
+URL_MSGPACK_PYTHON="https://pypi.python.org/packages/source/m/msgpack-python/$SRC_MSGPACK_PYTHON"
+CHK_MSGPACK_PYTHON="5aa1d925a536c399a07a1f1d8f394d991ff735724e304a8cdab768f216f93ee6"
+SUM_MSGPACK_PYTHON="sha256"
+BLD_MSGPACK_PYTHON() {
+  python setup.py install
+}
+
+VER_REQUESTS="2.7.0"
+DIR_REQUESTS="requests-$VER_REQUESTS"
+SRC_REQUESTS="$DIR_REQUESTS.tar.gz"
+URL_REQUESTS="https://pypi.python.org/packages/source/r/requests/$SRC_REQUESTS"
+CHK_REQUESTS="398a3db6d61899d25fd4a06c6ca12051b0ce171d705decd7ed5511517b4bb93d"
+SUM_REQUESTS="sha256"
+BLD_REQUESTS() {
+  python setup.py install
+}
+
+VER_LIBSODIUM="1.0.3"
+DIR_LIBSODIUM="libsodium-$VER_LIBSODIUM"
+SRC_LIBSODIUM="$DIR_LIBSODIUM.tar.gz"
+URL_LIBSODIUM="https://download.libsodium.org/libsodium/releases/$SRC_LIBSODIUM"
+CHK_LIBSODIUM="cbcfc63cc90c05d18a20f229a62c7e7054a73731d0aa858c0517152c549b1288"
+SUM_LIBSODIUM="sha256"
+BLD_LIBSODIUM() {
+  ./configure "--prefix=$INSTALL_DIR"
+  make
+  make install
+}
+
+VER_ZEROMQ="4.1.2"
+DIR_ZEROMQ="zeromq-$VER_ZEROMQ"
+SRC_ZEROMQ="$DIR_ZEROMQ.tar.gz"
+URL_ZEROMQ="http://download.zeromq.org/$SRC_ZEROMQ"
+CHK_ZEROMQ="f9162ead6d68521e5154d871bac304f88857308bb02366b81bb588497a345927"
+SUM_ZEROMQ="sha256"
+BLD_ZEROMQ() {
+  patch -p0 << 'EOF'
+--- src/blob.hpp.orig
++++ src/blob.hpp
+@@ -32,6 +32,7 @@
+ 
+ #include <string>
+ #include <string.h>
++#include <ios>
+ 
+ // Borrowed from id3lib_strings.h:
+ // They seem to be doing something for MSC, but since I only have gcc, I'll just do that
+--- src/metadata.hpp.orig
++++ src/metadata.hpp
+@@ -41,7 +41,7 @@
+     {
+         public:
+ 
+-            typedef std::map <std::string, const std::string> dict_t;
++            typedef std::map <std::string, std::string> dict_t;
+ 
+             metadata_t (const dict_t &dict);
+             virtual ~metadata_t ();
+--- src/socket_base.cpp.orig
++++ src/socket_base.cpp
+@@ -30,6 +30,7 @@
+ #include <new>
+ #include <string>
+ #include <algorithm>
++#include <cctype>
+ 
+ #include "platform.hpp"
+
+--- src/stream_engine.cpp.orig
++++ src/stream_engine.cpp
+@@ -208,7 +208,7 @@
+             //  Compile metadata.
+             typedef metadata_t::dict_t properties_t;
+             properties_t properties;
+-            properties.insert(std::make_pair("Peer-Address", peer_address));
++            properties.insert(std::make_pair(std::string("Peer-Address"), peer_address));
+             zmq_assert (metadata == NULL);
+             metadata = new (std::nothrow) metadata_t (properties);
+         }
+@@ -815,7 +815,7 @@
+ 
+     //  If we have a peer_address, add it to metadata
+     if (!peer_address.empty()) {
+-        properties.insert(std::make_pair("Peer-Address", peer_address));
++        properties.insert(std::make_pair(std::string("Peer-Address"), peer_address));
+     }
+ 
+     //  Add ZAP properties.
+EOF
+  sed -i 's/libzmq_werror="yes"/libzmq_werror="no"/' configure
+  ./configure "--prefix=$INSTALL_DIR" --with-relaxed
+  make
+  make install
+}
+
+VER_PYZMQ="14.7.0"
+DIR_PYZMQ="pyzmq-$VER_PYZMQ"
+SRC_PYZMQ="$DIR_PYZMQ.tar.gz"
+URL_PYZMQ="https://pypi.python.org/packages/source/p/pyzmq/$SRC_PYZMQ"
+CHK_PYZMQ="77994f80360488e7153e64e5959dc5471531d1648e3a4bff14a714d074a38cc2"
+SUM_PYZMQ="sha256"
+BLD_PYZMQ() {
+  python setup.py install
+}
+
+VER_SALT="2015.5.3"
+DIR_SALT="salt-$VER_SALT"
+SRC_SALT="$DIR_SALT.tar.gz"
+URL_SALT="https://pypi.python.org/packages/source/s/salt/$SRC_SALT"
+CHK_SALT="f8b04dc8bd4b00ce803d31ce5fba033c2f20fa38cdc5a3bf54b4c47362fbe853"
+SUM_SALT="sha256"
+BLD_SALT() {
+  python setup.py install
+}
+
+VER_PYCRYPTO="2.6.1"
+DIR_PYCRYPTO="pycrypto-$VER_PYCRYPTO"
+SRC_PYCRYPTO="$DIR_PYCRYPTO.tar.gz"
+URL_PYCRYPTO="https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/$SRC_PYCRYPTO"
+CHK_PYCRYPTO="f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"
+SUM_PYCRYPTO="sha256"
+BLD_PYCRYPTO() {
+  python setup.py install
+}
+
 PACKAGES=("${PACKAGES[@]}"
           WEAVE
           PYTHON_LOCKFILE
@@ -495,4 +665,15 @@ PACKAGES=("${PACKAGES[@]}"
           PYTHON_CONFIGOBJ
           NFDHCPD
           EBTABLES
-          FOLD)
+          FOLD
+          LIBYAML
+          PYYAML
+          MARKUPSAFE
+          JINJA2
+          MSGPACK_PYTHON
+          REQUESTS
+          LIBSODIUM
+          ZEROMQ
+          PYZMQ
+          PYCRYPTO
+          SALT)
