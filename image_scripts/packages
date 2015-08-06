@@ -628,16 +628,6 @@ BLD_PYZMQ() {
   python setup.py install
 }
 
-VER_SALT="2015.5.3"
-DIR_SALT="salt-$VER_SALT"
-SRC_SALT="$DIR_SALT.tar.gz"
-URL_SALT="https://pypi.python.org/packages/source/s/salt/$SRC_SALT"
-CHK_SALT="f8b04dc8bd4b00ce803d31ce5fba033c2f20fa38cdc5a3bf54b4c47362fbe853"
-SUM_SALT="sha256"
-BLD_SALT() {
-  python setup.py install
-}
-
 VER_PYCRYPTO="2.6.1"
 DIR_PYCRYPTO="pycrypto-$VER_PYCRYPTO"
 SRC_PYCRYPTO="$DIR_PYCRYPTO.tar.gz"
@@ -645,6 +635,27 @@ URL_PYCRYPTO="https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/$SRC_PYCRYPTO"
 CHK_PYCRYPTO="f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"
 SUM_PYCRYPTO="sha256"
 BLD_PYCRYPTO() {
+  python setup.py install
+}
+
+VER_DMIDECODE="2.12"
+DIR_DMIDECODE="dmidecode-$VER_DMIDECODE"
+SRC_DMIDECODE="$DIR_DMIDECODE.tar.gz"
+URL_DMIDECODE="http://download.savannah.gnu.org/releases/dmidecode/$SRC_DMIDECODE"
+CHK_DMIDECODE="5a8214b99c1762f4510bd92baa279336e5fed6e5cd2e418d46d95a4ecc783922"
+SUM_DMIDECODE="sha256"
+BLD_DMIDECODE() {
+  make
+  make prefix="$INSTALL_DIR" install
+}
+
+VER_SALT="2015.5.3"
+DIR_SALT="salt-$VER_SALT"
+SRC_SALT="$DIR_SALT.tar.gz"
+URL_SALT="https://pypi.python.org/packages/source/s/salt/$SRC_SALT"
+CHK_SALT="f8b04dc8bd4b00ce803d31ce5fba033c2f20fa38cdc5a3bf54b4c47362fbe853"
+SUM_SALT="sha256"
+BLD_SALT() {
   python setup.py install
 }
 
@@ -676,4 +687,5 @@ PACKAGES=("${PACKAGES[@]}"
           ZEROMQ
           PYZMQ
           PYCRYPTO
+          DMIDECODE
           SALT)
