@@ -428,11 +428,11 @@ BLD_PYTHON_CONFIGOBJ() {
   python setup.py install
 }
 
-VER_NFDHCPD="76488c025f7ea22328fae64c24fcaca8ba6ed279"
+VER_NFDHCPD="3e5119640ced6ffe4e528a3c1664db9d09286140"
 DIR_NFDHCPD="nfdhcpd-$VER_NFDHCPD"
 SRC_NFDHCPD="$DIR_NFDHCPD.tar.gz"
 URL_NFDHCPD="https://github.com/davedoesdev/nfdhcpd/archive/$VER_NFDHCPD.tar.gz"
-CHK_NFDHCPD="88eec2a91231457d623136bc4528e0477b2666d98f35b977ddad36dcb547192a"
+CHK_NFDHCPD="ae1cb1f85f4ed3d75517e79a9576fec6f05dfa6e0e015305efc6988f84a2ddb4"
 SUM_NFDHCPD="sha256"
 BLD_NFDHCPD() {
   sed 's/nobody/nfdhcpd/' nfdhcpd.conf > "$INSTALL_DIR/etc/nfdhcpd.conf"
@@ -454,7 +454,7 @@ BLD_EBTABLES() {
        "LIBDIR=$INSTALL_DIR/lib" install
 }
 
-VER_FOLD="c119462750736256dd638ce70620db4bb3f95b21"
+VER_FOLD="239fb9333a01c5285b1206d8536e8e18a3812917"
 RPO_FOLD="https://github.com/davedoesdev/fold.git"
 DIR_FOLD="fold-$VER_FOLD"
 SRC_FOLD="$DIR_FOLD.tar.gz"
