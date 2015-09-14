@@ -638,6 +638,26 @@ BLD_PYCRYPTO() {
   python setup.py install
 }
 
+VER_CERTIFI="2015.9.6.2"
+DIR_CERTIFI="certifi-$VER_CERTIFI"
+SRC_CERTIFI="$DIR_CERTIFI.tar.gz"
+URL_CERTIFI="https://pypi.python.org/packages/source/c/certifi/$SRC_CERTIFI"
+CHK_CERTIFI="dc3a2b2d9d1033dbf27586366ae61b9d7c44d8c3a6f29694ffcbb0618ea7aea6"
+SUM_CERTIFI="sha256"
+BLD_CERTIFI() {
+  python setup.py install
+}
+
+VER_TORNADO="4.2.1"
+DIR_TORNADO="tornado-$VER_TORNADO"
+SRC_TORNADO="$DIR_TORNADO.tar.gz"
+URL_TORNADO="https://pypi.python.org/packages/source/t/tornado/$SRC_TORNADO"
+CHK_TORNADO="a16fcdc4f76b184cb82f4f9eaeeacef6113b524b26a2cb331222e4a7fa6f2969"
+SUM_TORNADO="sha256"
+BLD_TORNADO() {
+  python setup.py install
+}
+
 VER_DMIDECODE="3.0"
 DIR_DMIDECODE="dmidecode-$VER_DMIDECODE"
 SRC_DMIDECODE="$DIR_DMIDECODE.tar.xz"
@@ -649,11 +669,11 @@ BLD_DMIDECODE() {
   make prefix="$INSTALL_DIR" install
 }
 
-VER_SALT="2015.5.3"
+VER_SALT="2015.8.0"
 DIR_SALT="salt-$VER_SALT"
 SRC_SALT="$DIR_SALT.tar.gz"
 URL_SALT="https://pypi.python.org/packages/source/s/salt/$SRC_SALT"
-CHK_SALT="f8b04dc8bd4b00ce803d31ce5fba033c2f20fa38cdc5a3bf54b4c47362fbe853"
+CHK_SALT="71e1cb2eb1d4b30f3247f5590c00a2089190b8f9a90c9330dc9a65fae517ec9b"
 SUM_SALT="sha256"
 BLD_SALT() {
   python setup.py install
@@ -687,5 +707,7 @@ PACKAGES=("${PACKAGES[@]}"
           ZEROMQ
           PYZMQ
           PYCRYPTO
+          CERTIFI
+          TORNADO
           DMIDECODE
           SALT)
