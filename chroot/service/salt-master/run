@@ -1,0 +1,10 @@
+#!/bin/bash
+exec 2>&1
+if grep -q 'heddle_prepare=1' /proc/cmdline; then
+  exec sv down salt-master
+fi
+case "$(hostname)" in
+  salt|salt-master*|salt-master-minion*) exec salt-master;;
+  '(none)') exit;;
+  *) exec sv down salt-master;;
+esac
