@@ -669,6 +669,32 @@ BLD_DMIDECODE() {
   make prefix="$INSTALL_DIR" install
 }
 
+VER_VIRT_WHAT="1.15"
+DIR_VIRT_WHAT="virt-what-$VER_VIRT_WHAT"
+SRC_VIRT_WHAT="$DIR_VIRT_WHAT.tar.gz"
+URL_VIRT_WHAT="http://people.redhat.com/~rjones/virt-what/files/$SRC_VIRT_WHAT"
+CHK_VIRT_WHAT="7ab9220d4682eadf9139c6afe62d33ebd273fff69e49054279caba5514937c41"
+SUM_VIRT_WHAT="sha256"
+BLD_VIRT_WHAT() {
+  ./configure "--prefix=$INSTALL_DIR"
+  make
+  make install
+  cat > "$INSTALL_DIR/bin/uname" << 'EOF'
+#!/bin/bash
+while getopts :p opt
+do
+  case $opt in
+    p)
+      echo "$heddle_arch"
+      exit
+      ;;
+  esac
+done
+exec /usr/bin/uname "$@"
+EOF
+  chmod +x "$INSTALL_DIR/bin/uname"
+}
+
 VER_SALT="2015.8.0"
 DIR_SALT="salt-$VER_SALT"
 SRC_SALT="$DIR_SALT.tar.gz"
@@ -710,4 +736,5 @@ PACKAGES=("${PACKAGES[@]}"
           CERTIFI
           TORNADO
           DMIDECODE
+          VIRT_WHAT
           SALT)
