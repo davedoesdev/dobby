@@ -1,0 +1,23 @@
+#!/bin/bash
+exec 2>&1
+if grep -q 'heddle_prepare=1' /proc/cmdline; then
+  exec sv down salt-display
+fi
+display() {
+  echo -e "$1"
+  echo -e "<0>$1" > /dev/kmsg
+}
+case "$(hostname)" in
+  salt-minion*|salt-master-minion*)
+    id="$(salt-call --output=txt --local grains.get id)"
+    finger="$(salt-call --output=txt --local key.finger)"
+    id="$(echo "$id" | cut -d ' ' -f 2-)"
+    finger="$(echo "$finger" | cut -d ' ' -f 2-)"
+    display "salt minion id: $id"
+    display "salt minion fingerprint: $finger"
+    ;;
+  '(none)')
+    exit
+    ;;
+esac
+exec sv down salt-display
