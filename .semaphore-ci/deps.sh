@@ -41,6 +41,7 @@ fi
 
 rm -rf aboriginal-* dobby
 bsdtar -Jxf "$bat_file"
+mkdir gen
 mv dobby/gen/build.img gen
 rm -rf dobby
 
