@@ -15,8 +15,8 @@ cd aboriginal-*
 
 build() {
   ../heddle/gen/new_arch.sh || return
-  ../image_scripts/make_build_and_home_images.sh || return 1
-  ../aboriginal_scripts/build_heddle.sh -c
+  ../heddle/image_scripts/make_build_and_home_images.sh || return 1
+  ../heddle/aboriginal_scripts/build_heddle.sh -c
 }
 logf="dobby-$version-log-x86_64.txt"
 if ! build >& "../$logf"; then
