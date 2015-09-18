@@ -1,0 +1,78 @@
+<html>
+<link rel="stylesheet" type="text/css" href="builds.css">
+<script src="jquery-1.11.2.min.js"></script>
+<script src="pure.min.js"></script>
+<script src="builds.js"></script>
+<script>
+function artifact_pp(path)
+{
+    var pos = path.indexOf('-gpt');
+    if (pos < 0)
+    {
+        pos = path.indexOf('-mbr');
+    }
+    if (pos < 0)
+    {
+        // legacy build.log
+        pos = path.lastIndexOf('.log');
+    }
+    if (pos < 0)
+    {
+        pos = path.lastIndexOf('-log');
+    }
+    if (pos < 0)
+    {
+        pos = path.lastIndexOf('-src');
+    }
+    var pos2 = path.indexOf('.', pos + 1);
+    return path.substring(pos + 1, pos2);
+}
+function show_spinner()
+{
+    $('#spinner').show();
+}
+function hide_spinner()
+{
+    $('#spinner').hide();
+}
+$(function ()
+{
+    $(document).ajaxStart(show_spinner);
+    $(document).ajaxStop(hide_spinner);
+    $('.branches').change(function ()
+    {
+        $('#builds').removeClass('branches_all')
+                    .removeClass('branches_release')
+                    .addClass('branches_' + $(this).val());
+    });
+    render_builds('#builds',
+                  'https://circleci.com/api/v1/project/davedoesdev/dobby',
+                  156,
+                  artifact_pp);
+});
+</script>
+<body>
+<table class="build_table">
+<thead>
+<tr>
+<th>Build</th>
+<th>
+<input type="radio" id="branches_all" class="branches" name="branches" value="all" checked><label for="branches_all">All branches</label><br>
+<input type="radio" id="branches_release" class="branches" name="branches" value="release"><label for="branches_release">Release branches</label>
+</th>
+<th>Commit</th>
+<th>Artifacts</th>
+</tr>
+</thead>
+<tbody id="builds" class="branches_all">
+<tr class="build_info">
+<td class="build"><a></a></td>
+<td class="branch"><a></a></td>
+<td class="commit"><a></a></td>
+<td class="artifacts"><span class="artifact"><a></a><br><input type="button" class="list_artifacts" value="List..."></span></td>
+</tr>
+</tbody>
+</table>
+<div id="spinner" class="loader"></div>
+</body>
+</html>
