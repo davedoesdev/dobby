@@ -30,5 +30,4 @@ fi
 cd "$GOPATH/src/github.com/weaveworks/weave"
 docker load -i alpine.tar
 CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO=
-rm -f weave*.tar
 # we'll be restarted and check for the images again

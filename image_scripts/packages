@@ -38,6 +38,15 @@ BLD_WEAVE() {
 
  WEAVER_EXE=prog/weaver/weaver
  WEAVEDNS_EXE=prog/weavedns/weavedns
+@@ -46,7 +46,7 @@
+ 	false; \
+ }
+ 
+-all: $(WEAVE_EXPORT)
++all: $(IMAGES_UPTODATE)
+ 
+ travis: $(EXES)
+ 
 EOF
   go clean -i net
   go install -tags netgo std
