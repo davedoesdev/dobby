@@ -127,7 +127,7 @@ prepare_and_dist() {
 }
 prepare_and_dist gpt-btrfs
 #prepare_and_dist gpt-ext4 -e
-prepare_and_dist mbr-btrfs -m
+#prepare_and_dist mbr-btrfs -m
 #prepare_and_dist mbr-ext4 '-m -e'
 
 ls -lh /dobby*
