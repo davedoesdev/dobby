@@ -126,8 +126,8 @@ prepare_and_dist() {
   sudo bsdtar -C .. -s "/^\./$prefix/" -JLcf "/$prefix.tar.xz" ./gen/x86_64/dist
 }
 prepare_and_dist gpt-btrfs
-prepare_and_dist gpt-ext4 -e
-prepare_and_dist mbr-btrfs -m
-prepare_and_dist mbr-ext4 '-m -e'
+#prepare_and_dist gpt-ext4 -e
+#prepare_and_dist mbr-btrfs -m
+#prepare_and_dist mbr-ext4 '-m -e'
 
 ls -lh /dobby*
