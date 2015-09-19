@@ -17,8 +17,8 @@ GET_WEAVE() {
 get_weave_deps: $(DOCKER_DISTRIB)
 EOF
   make get_weave_deps 1>&2
-  docker pull gliderlabs/alpine:latest 1>&2
-  docker save -o alpine.tar gliderlabs/alpine:latest 1>&2
+  # Get Alpine Docker image direct so we don't need Docker on build machine
+  curl -o alpine.tar 'https://circle-artifacts.com/gh/gliderlabs/docker-alpine/248/artifacts/3/home/ubuntu/docker-alpine/images/gliderlabs_alpine:latest-248.tar.gz' 1>&2
   tar -C "$GOPATH/.." -zc "$DIR_WEAVE"
 }
 BLD_WEAVE() {
