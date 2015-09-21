@@ -82,5 +82,35 @@ The [build list](http://rawgit.davedoesdev.com/davedoesdev/dobby/master/.circle-
 
 ## Building Dobby
 
-Coming soon...
+To build a Dobby image, follow the instructions for [extending Heddle](https://github.com/davedoesdev/heddle#extending-heddle). Remember to install the [build depedencies](https://github.com/davedoesdev/heddle#install-build-dependencies).
 
+For example:
+
+```shell
+# fetch dobby
+git clone https://github.com/davedoesdev/dobby.git
+cd dobby
+# fetch heddle
+git clone https://github.com/davedoesdev/heddle.git
+# fetch Aboriginal Linux
+curl http://landley.net/aboriginal/downloads/aboriginal-1.4.1.tar.gz | tar -zx
+# set extension path
+export HEDDLE_EXT_DIR="$PWD"
+# initialise dobby as heddle extension
+./heddle/gen/new_arch.sh
+# build Aboriginal linux
+cd aboriginal-1.4.1
+../heddle/aboriginal_scripts/config.sh
+./build.sh x86_64
+# build heddle and dobby packages
+../heddle/image_scripts/make_build_and_home_images.sh
+../heddle/aboriginal_scripts/build_heddle.sh
+# prepare dobby
+../heddle/image_scripts/make_run_and_extra_images.sh
+../heddle/aboriginal_scripts/run_heddle.sh -p
+# generate image
+../heddle/image_scripts/make_dist_and_heddle_images.sh
+../heddle/aboriginal_scripts/dist_heddle.sh
+# image is in gen/x86_64/dist/dobby.img, boot it with
+../gen/x86_64/dist/boot_dobby.sh
+```
