@@ -1,6 +1,13 @@
-export VER_WEAVE="85b4a05c9a0fc9538ab3298e5bf0cf0630b93033"
+export VER_ALPINE="248"
+ART_ALPINE="alpine:latest-$VER_ALPINE.tar.gz"
+CON_ALPINE="0"
+URL_ALPINE="https://circle-artifacts.com/gh/gliderlabs/docker-alpine/$VER_ALPINE/artifacts/$CON_ALPINE/home/ubuntu/docker-alpine/images/$ART_ALPINE"
+CHK_ALPINE="e6b0cd42db73255f7b67f53ec7dfd50ca49a18500d6bdb3ec785ea7860e4a5ff"
+SUM_ALPINE="sha256"
+
+export VER_WEAVE="a67b9f566a376fcf4da3f3e3c164a064c9be7365"
 RPO_WEAVE="https://github.com/weaveworks/weave.git"
-DIR_WEAVE="weave-$VER_WEAVE"
+DIR_WEAVE="weave-$VER_WEAVE-alpine-$VER_ALPINE"
 SRC_WEAVE="$DIR_WEAVE.tar.gz"
 GET_WEAVE() {
   export GOPATH="$PWD/$DIR_WEAVE"
@@ -10,7 +17,7 @@ GET_WEAVE() {
   git clone "$RPO_WEAVE"
   cd weave
   git checkout "$VER_WEAVE"
-  for x in weaver weavedns sigproxy weaveproxy weavewait netcheck; do
+  for x in weaver sigproxy weaveproxy weavewait weavehosts netcheck docker_tls_args; do
     go get -d -tags netgo ./prog/$x
   done
   cat >> Makefile << 'EOF'
@@ -18,7 +25,10 @@ get_weave_deps: $(DOCKER_DISTRIB)
 EOF
   make get_weave_deps 1>&2
   # Get Alpine Docker image direct so we don't need Docker on build machine
-  curl -o alpine.tar 'https://circle-artifacts.com/gh/gliderlabs/docker-alpine/248/artifacts/3/home/ubuntu/docker-alpine/images/gliderlabs_alpine:latest-248.tar.gz' 1>&2
+  curl -O "$URL_ALPINE" 1>&2
+  "${SUM_ALPINE}sum" -c --quiet << EOF
+$CHK_ALPINE  $ART_ALPINE
+EOF
   tar -C "$GOPATH/.." -zc "$DIR_WEAVE"
 }
 BLD_WEAVE() {
@@ -37,12 +47,12 @@ BLD_WEAVE() {
 +WEAVE_VERSION=$(VER_WEAVE)
 
  WEAVER_EXE=prog/weaver/weaver
- WEAVEDNS_EXE=prog/weavedns/weavedns
+ WEAVEPROXY_EXE=prog/weaveproxy/weaveproxy
 @@ -46,7 +46,7 @@
- 	false; \
  }
+ BUILD_FLAGS=-ldflags "-extldflags \"-static\" -X main.version $(WEAVE_VERSION)" -tags netgo
  
--all: $(WEAVE_EXPORT)
+-all: $(WEAVE_EXPORT) $(COVER_EXE) $(RUNNER_EXE)
 +all: $(IMAGES_UPTODATE)
  
  travis: $(EXES)
@@ -52,9 +62,17 @@ EOF
   go install -tags netgo std
   # We can't make the docker images themselves until we have docker running
   CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO= \
-      prog/weaver/weaver prog/weavedns/weavedns prog/weaveproxy/weaveproxy \
-      prog/sigproxy/sigproxy prog/weavewait/weavewait prog/netcheck/netcheck
+      prog/weaver/weaver \
+      prog/sigproxy/sigproxy \
+      prog/weaveproxy/weaveproxy \
+      prog/weavewait/weavewait \
+      prog/weavehosts/weavehosts \
+      prog/netcheck/netcheck \
+      prog/docker_tls_args/docker_tls_args
   ln -sf "$d/weave" "$GOPATH/bin"
+}
+PST_WEAVE() {
+  export WEAVE_VERSION="$VER_WEAVE"
 }
 
 VER_PYTHON_LOCKFILE="0.8"
@@ -315,7 +333,7 @@ BLD_SWIG() {
 }
 
 VER_NFQUEUE_BINDINGS="0.5"
-RPO_NFQUEUE_BINDINGS="git://www.wzdftpd.net/nfqueue-bindings.git"
+RPO_NFQUEUE_BINDINGS="https://github.com/chifflier/nfqueue-bindings.git"
 DIR_NFQUEUE_BINDINGS="nfqueue-bindings-$VER_NFQUEUE_BINDINGS"
 SRC_NFQUEUE_BINDINGS="$DIR_NFQUEUE_BINDINGS.tar.gz"
 GET_NFQUEUE_BINDINGS() {

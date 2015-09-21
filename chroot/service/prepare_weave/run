@@ -7,7 +7,7 @@ if grep -q 'heddle_prepare=1' /proc/cmdline; then
   fi
 else
   exec 2>&1
-  exec sv down prepare_weave
+  # we always have to run because updates won't use heddle_prepare=1
 fi
 set -e
 
@@ -19,15 +19,32 @@ docker info
 docker history scratch
 
 # check if weave images exist
-if docker history weaveworks/weave && \
-   docker history weaveworks/weavedns && \
-   docker history weaveworks/weaveexec; then
+if docker history "weaveworks/weave:$VER_WEAVE" && \
+   docker history "weaveworks/weaveexec:$VER_WEAVE" && \
+   docker history "alpine:latest-$VER_ALPINE"; then
   echo weave images exist
   exec sv down prepare_weave
 fi
 
-# make weave images
+# remove any existing :latest tags
+docker rmi weaveworks/weave:latest || true
+docker rmi weaveworks/weaveexec:latest || true
+docker rmi alpine:latest || true
+
+# import alpine image
 cd "$GOPATH/src/github.com/weaveworks/weave"
-docker load -i alpine.tar
+docker load -i "alpine:latest-$VER_ALPINE.tar.gz"
+docker tag -f "alpine:latest-$VER_ALPINE" alpine:latest
+
+# make weave images
 CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO=
+
+# weave tags its images :latest so tag them back
+docker tag -f weaveworks/weave:latest "weaveworks/weave:$VER_WEAVE"
+docker tag -f weaveworks/weaveexec:latest "weaveworks/weaveexec:$VER_WEAVE"
+# and remove :latest tags
+docker rmi weaveworks/weave:latest
+docker rmi weaveworks/weaveexec:latest
+docker rmi alpine:latest
+
 # we'll be restarted and check for the images again

@@ -1,8 +1,7 @@
 #!/bin/sh
 exec 2>&1
 set -e
-docker history weaveworks/weave
-docker history weaveworks/weavedns
-docker history weaveworks/weaveexec
+docker history "weaveworks/weave:$VER_WEAVE" && ! docker history weaveworks/weave:latest
+docker history "weaveworks/weaveexec:$VER_WEAVE" && ! docker history weaveworks/weaveexec:latest
 weave launch
 exec docker wait weave
