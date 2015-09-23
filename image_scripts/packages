@@ -517,56 +517,6 @@ BLD_LIBYAML() {
   make install
 }
 
-VER_PYYAML="3.11"
-DIR_PYYAML="PyYAML-$VER_PYYAML"
-SRC_PYYAML="$DIR_PYYAML.tar.gz"
-URL_PYYAML="http://pyyaml.org/download/pyyaml/$SRC_PYYAML"
-CHK_PYYAML="c36c938a872e5ff494938b33b14aaa156cb439ec67548fcab3535bb78b0846e8"
-SUM_PYYAML="sha256"
-BLD_PYYAML() {
-  python setup.py install
-}
-
-VER_MARKUPSAFE="0.23"
-DIR_MARKUPSAFE="MarkupSafe-$VER_MARKUPSAFE"
-SRC_MARKUPSAFE="$DIR_MARKUPSAFE.tar.gz"
-URL_MARKUPSAFE="https://pypi.python.org/packages/source/M/MarkupSafe/$SRC_MARKUPSAFE"
-CHK_MARKUPSAFE="a4ec1aff59b95a14b45eb2e23761a0179e98319da5a7eb76b56ea8cdc7b871c3"
-SUM_MARKUPSAFE="sha256"
-BLD_MARKUPSAFE() {
-  python setup.py install
-}
-
-VER_JINJA2="2.8"
-DIR_JINJA2="Jinja2-$VER_JINJA2"
-SRC_JINJA2="$DIR_JINJA2.tar.gz"
-URL_JINJA2="https://pypi.python.org/packages/source/J/Jinja2/$SRC_JINJA2"
-CHK_JINJA2="bc1ff2ff88dbfacefde4ddde471d1417d3b304e8df103a7a9437d47269201bf4"
-SUM_JINJA2="sha256"
-BLD_JINJA2() {
-  python setup.py install
-}
-
-VER_MSGPACK_PYTHON="0.1.12"
-DIR_MSGPACK_PYTHON="msgpack-python-$VER_MSGPACK_PYTHON"
-SRC_MSGPACK_PYTHON="$DIR_MSGPACK_PYTHON.tar.gz"
-URL_MSGPACK_PYTHON="https://pypi.python.org/packages/source/m/msgpack-python/$SRC_MSGPACK_PYTHON"
-CHK_MSGPACK_PYTHON="5aa1d925a536c399a07a1f1d8f394d991ff735724e304a8cdab768f216f93ee6"
-SUM_MSGPACK_PYTHON="sha256"
-BLD_MSGPACK_PYTHON() {
-  python setup.py install
-}
-
-VER_REQUESTS="2.7.0"
-DIR_REQUESTS="requests-$VER_REQUESTS"
-SRC_REQUESTS="$DIR_REQUESTS.tar.gz"
-URL_REQUESTS="https://pypi.python.org/packages/source/r/requests/$SRC_REQUESTS"
-CHK_REQUESTS="398a3db6d61899d25fd4a06c6ca12051b0ce171d705decd7ed5511517b4bb93d"
-SUM_REQUESTS="sha256"
-BLD_REQUESTS() {
-  python setup.py install
-}
-
 VER_LIBSODIUM="1.0.3"
 DIR_LIBSODIUM="libsodium-$VER_LIBSODIUM"
 SRC_LIBSODIUM="$DIR_LIBSODIUM.tar.gz"
@@ -645,56 +595,6 @@ EOF
   make install
 }
 
-VER_PYZMQ="14.7.0"
-DIR_PYZMQ="pyzmq-$VER_PYZMQ"
-SRC_PYZMQ="$DIR_PYZMQ.tar.gz"
-URL_PYZMQ="https://pypi.python.org/packages/source/p/pyzmq/$SRC_PYZMQ"
-CHK_PYZMQ="77994f80360488e7153e64e5959dc5471531d1648e3a4bff14a714d074a38cc2"
-SUM_PYZMQ="sha256"
-BLD_PYZMQ() {
-  python setup.py install
-}
-
-VER_PYCRYPTO="2.6.1"
-DIR_PYCRYPTO="pycrypto-$VER_PYCRYPTO"
-SRC_PYCRYPTO="$DIR_PYCRYPTO.tar.gz"
-URL_PYCRYPTO="https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/$SRC_PYCRYPTO"
-CHK_PYCRYPTO="f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"
-SUM_PYCRYPTO="sha256"
-BLD_PYCRYPTO() {
-  python setup.py install
-}
-
-VER_CERTIFI="2015.9.6.2"
-DIR_CERTIFI="certifi-$VER_CERTIFI"
-SRC_CERTIFI="$DIR_CERTIFI.tar.gz"
-URL_CERTIFI="https://pypi.python.org/packages/source/c/certifi/$SRC_CERTIFI"
-CHK_CERTIFI="dc3a2b2d9d1033dbf27586366ae61b9d7c44d8c3a6f29694ffcbb0618ea7aea6"
-SUM_CERTIFI="sha256"
-BLD_CERTIFI() {
-  python setup.py install
-}
-
-VER_BACKPORTS_SSL_MATCH_HOSTNAME="3.4.0.2"
-DIR_BACKPORTS_SSL_MATCH_HOSTNAME="backports.ssl_match_hostname-$VER_BACKPORTS_SSL_MATCH_HOSTNAME"
-SRC_BACKPORTS_SSL_MATCH_HOSTNAME="$DIR_BACKPORTS_SSL_MATCH_HOSTNAME.tar.gz"
-URL_BACKPORTS_SSL_MATCH_HOSTNAME="https://pypi.python.org/packages/source/b/backports.ssl_match_hostname/$SRC_BACKPORTS_SSL_MATCH_HOSTNAME"
-CHK_BACKPORTS_SSL_MATCH_HOSTNAME="07410e7fb09aab7bdaf5e618de66c3dac84e2e3d628352814dc4c37de321d6ae"
-SUM_BACKPORTS_SSL_MATCH_HOSTNAME="sha256"
-BLD_BACKPORTS_SSL_MATCH_HOSTNAME() {
-  python setup.py install
-}
-
-VER_TORNADO="4.2.1"
-DIR_TORNADO="tornado-$VER_TORNADO"
-SRC_TORNADO="$DIR_TORNADO.tar.gz"
-URL_TORNADO="https://pypi.python.org/packages/source/t/tornado/$SRC_TORNADO"
-CHK_TORNADO="a16fcdc4f76b184cb82f4f9eaeeacef6113b524b26a2cb331222e4a7fa6f2969"
-SUM_TORNADO="sha256"
-BLD_TORNADO() {
-  python setup.py install
-}
-
 VER_DMIDECODE="3.0"
 DIR_DMIDECODE="dmidecode-$VER_DMIDECODE"
 SRC_DMIDECODE="$DIR_DMIDECODE.tar.xz"
@@ -736,9 +636,33 @@ VER_SALT="2015.8.0"
 DIR_SALT="salt-$VER_SALT"
 SRC_SALT="$DIR_SALT.tar.gz"
 URL_SALT="https://pypi.python.org/packages/source/s/salt/$SRC_SALT"
-CHK_SALT="71e1cb2eb1d4b30f3247f5590c00a2089190b8f9a90c9330dc9a65fae517ec9b"
-SUM_SALT="sha256"
+GET_SALT() {
+  wget -O - "$URL_SALT" | tar -zx
+  cd "$DIR_SALT"
+  mkdir downloads
+  pip install --download downloads -r requirements/zeromq.txt 1>&2
+  pip install --download downloads psutil 1>&2
+  tar -C .. -zc "$DIR_SALT"
+}
 BLD_SALT() {
+  pip install --no-index --find-links=downloads -r requirements/zeromq.txt
+  pip install --no-index --find-links=downloads psutil
+  python setup.py install
+}
+
+VER_FLOCKER="1.4.0.dev2"
+DIR_FLOCKER="flocker-$VER_FLOCKER"
+SRC_FLOCKER="$DIR_FLOCKER.tar.gz"
+URL_FLOCKER="https://github.com/ClusterHQ/flocker/archive/$VER_FLOCKER.tar.gz"
+GET_FLOCKER() {
+  wget -O - "$URL_FLOCKER" | tar -zx
+  cd "$DIR_FLOCKER"
+  mkdir downloads
+  pip install --download downloads -r requirements.txt 1>&2
+  tar -C .. -zc "$DIR_FLOCKER"
+}
+BLD_FLOCKER() {
+  pip install --no-index --find-links=downloads -r requirements.txt
   python setup.py install
 }
 
@@ -761,18 +685,9 @@ PACKAGES=("${PACKAGES[@]}"
           EBTABLES
           FOLD
           LIBYAML
-          PYYAML
-          MARKUPSAFE
-          JINJA2
-          MSGPACK_PYTHON
-          REQUESTS
           LIBSODIUM
           ZEROMQ
-          PYZMQ
-          PYCRYPTO
-          CERTIFI
-          BACKPORTS_SSL_MATCH_HOSTNAME
-          TORNADO
           DMIDECODE
           VIRT_WHAT
-          SALT)
+          SALT
+          FLOCKER)

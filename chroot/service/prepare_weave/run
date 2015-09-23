@@ -7,7 +7,7 @@ if grep -q 'heddle_prepare=1' /proc/cmdline; then
   fi
 else
   exec 2>&1
-  # we always have to run because updates won't use heddle_prepare=1
+  # we always have to run because updates don't use heddle_prepare=1
 fi
 set -e
 
