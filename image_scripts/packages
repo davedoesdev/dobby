@@ -650,22 +650,6 @@ BLD_SALT() {
   python setup.py install
 }
 
-VER_FLOCKER="1.4.0.dev2"
-DIR_FLOCKER="flocker-$VER_FLOCKER"
-SRC_FLOCKER="$DIR_FLOCKER.tar.gz"
-URL_FLOCKER="https://github.com/ClusterHQ/flocker/archive/$VER_FLOCKER.tar.gz"
-GET_FLOCKER() {
-  wget -O - "$URL_FLOCKER" | tar -zx
-  cd "$DIR_FLOCKER"
-  mkdir downloads
-  pip install --download downloads -r requirements.txt 1>&2
-  tar -C .. -zc "$DIR_FLOCKER"
-}
-BLD_FLOCKER() {
-  pip install --no-index --find-links=downloads -r requirements.txt
-  python setup.py install
-}
-
 PACKAGES=("${PACKAGES[@]}"
           WEAVE
           PYTHON_LOCKFILE
@@ -689,5 +673,4 @@ PACKAGES=("${PACKAGES[@]}"
           ZEROMQ
           DMIDECODE
           VIRT_WHAT
-          SALT
-          FLOCKER)
+          SALT)
