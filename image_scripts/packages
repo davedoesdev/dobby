@@ -616,20 +616,6 @@ BLD_VIRT_WHAT() {
   ./configure "--prefix=$INSTALL_DIR"
   make
   make install
-  cat > "$INSTALL_DIR/bin/uname" << 'EOF'
-#!/bin/bash
-while getopts :p opt
-do
-  case $opt in
-    p)
-      echo "$heddle_arch"
-      exit
-      ;;
-  esac
-done
-exec /usr/bin/uname "$@"
-EOF
-  chmod +x "$INSTALL_DIR/bin/uname"
 }
 
 VER_SALT="2015.8.0"
