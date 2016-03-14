@@ -1,11 +1,11 @@
-export VER_ALPINE="248"
+export VER_ALPINE="445"
 ART_ALPINE="alpine:latest-$VER_ALPINE.tar.gz"
-CON_ALPINE="0"
+CON_ALPINE="1"
 URL_ALPINE="https://circle-artifacts.com/gh/gliderlabs/docker-alpine/$VER_ALPINE/artifacts/$CON_ALPINE/home/ubuntu/docker-alpine/images/$ART_ALPINE"
-CHK_ALPINE="e6b0cd42db73255f7b67f53ec7dfd50ca49a18500d6bdb3ec785ea7860e4a5ff"
+CHK_ALPINE="a131e1b07efffe4ff0a4b7e33520446f36a17eedab010bce7a251f3763b2f50c"
 SUM_ALPINE="sha256"
 
-export VER_WEAVE="a67b9f566a376fcf4da3f3e3c164a064c9be7365"
+export VER_WEAVE="05a7024b885d15dc7d2aec3a9fa5a8f83735f7e8"
 RPO_WEAVE="https://github.com/weaveworks/weave.git"
 DIR_WEAVE="weave-$VER_WEAVE-alpine-$VER_ALPINE"
 SRC_WEAVE="$DIR_WEAVE.tar.gz"
@@ -17,13 +17,13 @@ GET_WEAVE() {
   git clone "$RPO_WEAVE"
   cd weave
   git checkout "$VER_WEAVE"
-  for x in weaver sigproxy weaveproxy weavewait weavehosts netcheck docker_tls_args; do
-    go get -d -tags netgo ./prog/$x
+  for x in weaver weaveproxy sigproxy weavewait weaveutil plugin; do
+    go get -d ./prog/$x
   done
   cat >> Makefile << 'EOF'
 get_weave_deps: $(DOCKER_DISTRIB)
 EOF
-  make get_weave_deps 1>&2
+  make "WEAVEEXEC_DOCKER_VERSION=$VER_DOCKER" get_weave_deps 1>&2
   # Get Alpine Docker image direct so we don't need Docker on build machine
   curl -O "$URL_ALPINE" 1>&2
   "${SUM_ALPINE}sum" -c --quiet << EOF
@@ -39,36 +39,38 @@ BLD_WEAVE() {
   patch -p0 << 'EOF'
 --- Makefile.orig
 +++ Makefile
-@@ -7,7 +7,7 @@
- SUDO=sudo
+@@ -11,7 +11,7 @@ RUN_FLAGS=-ti
+ COVERAGE=
  
  DOCKERHUB_USER=weaveworks
 -WEAVE_VERSION=git-$(shell git rev-parse --short=12 HEAD)
 +WEAVE_VERSION=$(VER_WEAVE)
-
+ 
  WEAVER_EXE=prog/weaver/weaver
  WEAVEPROXY_EXE=prog/weaveproxy/weaveproxy
-@@ -46,7 +46,7 @@
- }
- BUILD_FLAGS=-ldflags "-extldflags \"-static\" -X main.version $(WEAVE_VERSION)" -tags netgo
+@@ -57,7 +57,7 @@ BUILD_FLAGS=-i -ldflags "-extldflags \"-static\" -X main.version=$(WEAVE_VERSION
  
--all: $(WEAVE_EXPORT) $(COVER_EXE) $(RUNNER_EXE)
+ PACKAGE_BASE=$(shell go list -e ./)
+ 
+-all: $(WEAVE_EXPORT)
 +all: $(IMAGES_UPTODATE)
- 
- travis: $(EXES)
+ exes: $(EXES)
+ testrunner: $(RUNNER_EXE) $(TEST_TLS_EXE)
  
 EOF
   go clean -i net
   go install -tags netgo std
   # We can't make the docker images themselves until we have docker running
-  CGO_CPPFLAGS="$CPPFLAGS" CGO_LDFLAGS="$LDFLAGS" make SUDO= \
+  touch .build.uptodate
+  make SUDO= BUILD_IN_CONTAINER=false \
       prog/weaver/weaver \
-      prog/sigproxy/sigproxy \
       prog/weaveproxy/weaveproxy \
+      prog/sigproxy/sigproxy \
       prog/weavewait/weavewait \
-      prog/weavehosts/weavehosts \
-      prog/netcheck/netcheck \
-      prog/docker_tls_args/docker_tls_args
+      prog/weavewait/weavewait_noop \
+      prog/weavewait/weavewait_nomcast \
+      prog/weaveutil/weaveutil \
+      prog/plugin/plugin
   ln -sf "$d/weave" "$GOPATH/bin"
 }
 PST_WEAVE() {
@@ -637,26 +639,26 @@ BLD_SALT() {
 }
 
 PACKAGES=("${PACKAGES[@]}"
-          WEAVE
-          PYTHON_LOCKFILE
-          PYTHON_DAEMON
-          CMAKE
-          SWIG
-          NFQUEUE_BINDINGS
-          PYINOTIFY
-          DNSPYTHON
-          PYTHON_IPY
-          LIBCAP_NG
-          TCPDUMP
-          SCAPY
-          PYTHON_SIX
-          PYTHON_CONFIGOBJ
-          NFDHCPD
-          EBTABLES
-          FOLD
-          LIBYAML
-          LIBSODIUM
-          ZEROMQ
-          DMIDECODE
-          VIRT_WHAT
-          SALT)
+          WEAVE)
+#          PYTHON_LOCKFILE
+#          PYTHON_DAEMON
+#          CMAKE
+#          SWIG
+#          NFQUEUE_BINDINGS
+#          PYINOTIFY
+#          DNSPYTHON
+#          PYTHON_IPY
+#          LIBCAP_NG
+#          TCPDUMP
+#          SCAPY
+#          PYTHON_SIX
+#          PYTHON_CONFIGOBJ
+#          NFDHCPD
+#          EBTABLES
+#          FOLD
+#          LIBYAML
+#          LIBSODIUM
+#          ZEROMQ
+#          DMIDECODE
+#          VIRT_WHAT
+#          SALT)

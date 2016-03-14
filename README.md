@@ -93,13 +93,13 @@ cd dobby
 # fetch heddle
 git clone https://github.com/davedoesdev/heddle.git
 # fetch Aboriginal Linux
-curl http://landley.net/aboriginal/downloads/aboriginal-1.4.1.tar.gz | tar -zx
+curl http://landley.net/aboriginal/downloads/aboriginal-1.4.5.tar.gz | tar -zx
 # set extension path
 export HEDDLE_EXT_DIR="$PWD"
 # initialise dobby as heddle extension
 ./heddle/gen/new_arch.sh
 # build Aboriginal linux
-cd aboriginal-1.4.1
+cd aboriginal-1.4.5
 ../heddle/aboriginal_scripts/config.sh
 ./build.sh x86_64
 # build heddle and dobby packages
