@@ -5,7 +5,7 @@ URL_ALPINE="https://circle-artifacts.com/gh/gliderlabs/docker-alpine/$VER_ALPINE
 CHK_ALPINE="a131e1b07efffe4ff0a4b7e33520446f36a17eedab010bce7a251f3763b2f50c"
 SUM_ALPINE="sha256"
 
-export VER_WEAVE="05a7024b885d15dc7d2aec3a9fa5a8f83735f7e8"
+export VER_WEAVE="91044ac0fafb3678eb50100acc76a537ba43f06d"
 RPO_WEAVE="https://github.com/weaveworks/weave.git"
 DIR_WEAVE="weave-$VER_WEAVE-alpine-$VER_ALPINE"
 SRC_WEAVE="$DIR_WEAVE.tar.gz"
@@ -17,9 +17,7 @@ GET_WEAVE() {
   git clone "$RPO_WEAVE"
   cd weave
   git checkout "$VER_WEAVE"
-  for x in weaver weaveproxy sigproxy weavewait weaveutil plugin; do
-    go get -d ./prog/$x
-  done
+  git submodule update --init 1>&2
   cat >> Makefile << 'EOF'
 get_weave_deps: $(DOCKER_DISTRIB)
 EOF
@@ -77,39 +75,56 @@ PST_WEAVE() {
   export WEAVE_VERSION="$VER_WEAVE"
 }
 
-VER_PYTHON_LOCKFILE="0.8"
-DIR_PYTHON_LOCKFILE="lockfile-$VER_PYTHON_LOCKFILE"
-SRC_PYTHON_LOCKFILE="$DIR_PYTHON_LOCKFILE.tar.gz"
-URL_PYTHON_LOCKFILE="https://pypi.python.org/packages/source/l/lockfile/$SRC_PYTHON_LOCKFILE"
-CHK_PYTHON_LOCKFILE="3b2cccb9517fa29f86b743577f00f4545d98905e13fe49452604af470e50ce22"
-SUM_PYTHON_LOCKFILE="sha256"
-BLD_PYTHON_LOCKFILE() {
-  python setup.py install
-}
-
-VER_PYTHON_DAEMON="1.5.5"
+VER_PYTHON_DAEMON="2.1.1"
 DIR_PYTHON_DAEMON="python-daemon-$VER_PYTHON_DAEMON"
 SRC_PYTHON_DAEMON="$DIR_PYTHON_DAEMON.tar.gz"
-URL_PYTHON_DAEMON="https://pypi.python.org/packages/source/p/python-daemon/$SRC_PYTHON_DAEMON"
-CHK_PYTHON_DAEMON="1406962e48ce03642c6057f40f9ffd49493792a7b34357fe9e264708748c83c0"
-SUM_PYTHON_DAEMON="sha256"
+GET_PYTHON_DAEMON() {
+  mkdir "$DIR_PYTHON_DAEMON"
+  pip install --download "$DIR_PYTHON_DAEMON" "python-daemon==$VER_PYTHON_DAEMON" 1>&2
+  tar -zc "$DIR_PYTHON_DAEMON"
+}
 BLD_PYTHON_DAEMON() {
-  python setup.py install
+  pip install --no-index --find-links=. python-daemon
 }
 
 # CMake is required by nfqueue-bindings
-VER_CMAKE="3.2.3"
+VER_CMAKE="3.5.0"
 DIR_CMAKE="cmake-$VER_CMAKE"
-# cmake.org sets 
-# Content-Type: application/x-gzip
-# Content-Encoding: x-gzip
-# so wget (and curl) decompress it
 SRC_CMAKE="$DIR_CMAKE.tar.gz"
 URL_CMAKE="http://www.cmake.org/files/v$(echo "$VER_CMAKE" | sed -r 's/([0-9]+\.[0-9]+).*/\1/')/$SRC_CMAKE"
-CHK_CMAKE="a1ebcaf6d288eb4c966714ea457e3b9677cdfde78820d0f088712d7320850297"
+CHK_CMAKE="92c83ad8a4fd6224cf6319a60b399854f55b38ebe9d297c942408b792b1a9efa"
 SUM_CMAKE="sha256"
 BLD_CMAKE() {
   patch -p0 << 'EOF'
+--- Source/cmPolicies.cxx.orig
++++ Source/cmPolicies.cxx
+@@ -364,11 +364,11 @@
+ {
+   PolicyStatus status = cmPolicies::WARN;
+ 
+-  if (this->Status[(POLICY_STATUS_COUNT * id) + OLD])
++  if (this->Status.test((POLICY_STATUS_COUNT * id) + OLD))
+     {
+     status = cmPolicies::OLD;
+     }
+-  else if (this->Status[(POLICY_STATUS_COUNT * id) + NEW])
++  else if (this->Status.test((POLICY_STATUS_COUNT * id) + NEW))
+     {
+     status = cmPolicies::NEW;
+     }
+@@ -385,9 +385,9 @@
+ 
+ bool cmPolicies::PolicyMap::IsDefined(cmPolicies::PolicyID id) const
+ {
+-  return this->Status[(POLICY_STATUS_COUNT * id) + OLD]
+-      || this->Status[(POLICY_STATUS_COUNT * id) + WARN]
+-      || this->Status[(POLICY_STATUS_COUNT * id) + NEW];
++  return this->Status.test((POLICY_STATUS_COUNT * id) + OLD)
++      || this->Status.test((POLICY_STATUS_COUNT * id) + WARN)
++      || this->Status.test((POLICY_STATUS_COUNT * id) + NEW);
+ }
+ 
+ bool cmPolicies::PolicyMap::IsEmpty() const
 --- Source/cmPathLabel.h.orig
 +++ Source/cmPathLabel.h
 @@ -30,6 +30,10 @@
@@ -123,27 +138,34 @@ BLD_CMAKE() {
  
    const std::string& GetLabel() const { return this->Label; }
    const unsigned int& GetHash() const { return this->Hash; }
---- Source/cmListFileCache.h.orig
-+++ Source/cmListFileCache.h
-@@ -76,6 +76,7 @@
-       , Relative(localGen ? false : true)
+--- Source/cmParseArgumentsCommand.cxx.orig
++++ Source/cmParseArgumentsCommand.cxx
+@@ -109,7 +109,7 @@
+   for (argIter = list.begin(), argEnd = list.end();
+        argIter != argEnd; ++argIter)
      {
+-    const options_map::iterator optIter = options.find(*argIter);
++    options_map::iterator optIter = options.find(*argIter);
+     if (optIter != options.end())
+       {
+       insideValues = NONE;
+--- Source/cmListCommand.cxx.orig
++++ Source/cmListCommand.cxx
+@@ -504,9 +504,9 @@
      }
-+    cmListFileBacktrace() {}
  
-     void MakeRelative();
-   private:
-@@ -102,6 +103,7 @@
-                           const cmListFileBacktrace &bt)
-     : Value(value), Backtrace(bt)
-   {}
-+  cmValueWithOrigin() {}
-   std::string Value;
-   cmListFileBacktrace Backtrace;
- };
+   std::sort(removed.begin(), removed.end());
+-  std::vector<size_t>::const_iterator remEnd =
++  std::vector<size_t>::iterator remEnd =
+       std::unique(removed.begin(), removed.end());
+-  std::vector<size_t>::const_iterator remBegin = removed.begin();
++  std::vector<size_t>::iterator remBegin = removed.begin();
+ 
+   std::vector<std::string>::const_iterator argsEnd =
+       cmRemoveIndices(varArgsExpanded, cmMakeRange(remBegin, remEnd));
 --- Source/cmLocalGenerator.cxx.orig
 +++ Source/cmLocalGenerator.cxx
-@@ -2641,7 +2641,7 @@
+@@ -2458,7 +2458,7 @@
        // -DNAME="value" instead of -D"NAME=value" to help VS6 parser.
        std::string::size_type eq = defineIt->find("=");
        def += defineIt->substr(0, eq);
@@ -152,6 +174,62 @@ BLD_CMAKE() {
          {
          def += "=";
          def += this->EscapeForShell(defineIt->c_str() + eq + 1, true);
+--- Source/cmFileCommand.cxx.orig
++++ Source/cmFileCommand.cxx
+@@ -259,7 +259,16 @@
+     }
+   // If GetPermissions fails, pretend like it is ok. File open will fail if
+   // the file is not writable
+-  cmsys::ofstream file(fileName.c_str(), append?std::ios::app: std::ios::out);
++  std::ios_base::openmode om;
++  if (append)
++    {
++    om = std::ios::app;
++    }
++  else
++    {
++    om = std::ios::out;
++    }
++  cmsys::ofstream file(fileName.c_str(), om);
+   if ( !file )
+     {
+     std::string error = "failed to open for writing (";
+@@ -659,7 +668,7 @@
+ #else
+   cmsys::ifstream fin(fileName.c_str(), std::ios::in);
+ #endif
+-  if(!fin)
++  if(fin.fail())
+     {
+     std::ostringstream e;
+     e << "STRINGS file \"" << fileName << "\" cannot be read.";
+@@ -690,7 +699,7 @@
+   std::string s;
+   while((!limit_count || strings.size() < limit_count) &&
+         (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
+-        fin)
++        !fin.eof())
+     {
+     std::string current_str;
+ 
+@@ -698,7 +707,7 @@
+     for(unsigned int i=0; i<bytes_rem; ++i)
+       {
+       int c1 = fin.get();
+-      if(!fin)
++      if(fin.eof())
+         {
+         fin.putback(static_cast<char>(c1));
+         break;
+@@ -753,7 +762,7 @@
+         if(j != 0)
+           {
+           c = fin.get();
+-          if(!fin || (c & 0xC0) != 0x80)
++          if(fin.eof() || (c & 0xC0) != 0x80)
+             {
+             fin.putback(static_cast<char>(c));
+             break;
 --- Source/cmFindPackageCommand.cxx.orig
 +++ Source/cmFindPackageCommand.cxx
 @@ -295,7 +295,7 @@
@@ -165,7 +243,7 @@ BLD_CMAKE() {
          std::ostringstream e;
 --- Source/cmTryRunCommand.cxx.orig
 +++ Source/cmTryRunCommand.cxx
-@@ -304,8 +304,16 @@
+@@ -328,8 +328,16 @@
    if (error)
      {
      static bool firstTryRun = true;
@@ -184,54 +262,6 @@ BLD_CMAKE() {
      if ( file )
        {
        if (firstTryRun)
---- Source/cmFileCommand.cxx.orig
-+++ Source/cmFileCommand.cxx
-@@ -262,7 +262,16 @@
-     }
-   // If GetPermissions fails, pretend like it is ok. File open will fail if
-   // the file is not writable
--  cmsys::ofstream file(fileName.c_str(), append?std::ios::app: std::ios::out);
-+  std::ios_base::openmode om;
-+  if (append)
-+    {
-+    om = std::ios::app;
-+    }
-+  else
-+    {
-+    om = std::ios::out;
-+    }
-+  cmsys::ofstream file(fileName.c_str(), om);
-   if ( !file )
-     {
-     std::string error = "failed to open for writing (";
-@@ -701,7 +701,7 @@
-   std::string s;
-   while((!limit_count || strings.size() < limit_count) &&
-         (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
--        fin)
-+        !fin.eof())
-     {
-     std::string current_str;
- 
-@@ -709,7 +709,7 @@
-     for(unsigned int i=0; i<bytes_rem; ++i)
-       {
-       int c1 = fin.get();
--      if(!fin)
-+      if(fin.eof())
-         {
-         fin.putback(static_cast<char>(c1));
-         break;
---- Source/cmTarget.cxx.orig
-+++ Source/cmTarget.cxx
-@@ -6863,7 +6863,6 @@
-   // instances.  We also enforce in debug mode that the map be emptied
-   // when copied.
-   static_cast<void>(r);
--  assert(r.empty());
- }
- 
- //----------------------------------------------------------------------------
 --- Utilities/cmjsoncpp/src/lib_json/json_reader.cpp.orig
 +++ Utilities/cmjsoncpp/src/lib_json/json_reader.cpp
 @@ -14,6 +14,7 @@
@@ -255,14 +285,14 @@ BLD_CMAKE() {
      return ValueInternalArray::dereference(iterator_.array_);
 --- Source/CTest/cmCTestSubmitHandler.cxx.orig
 +++ Source/CTest/cmCTestSubmitHandler.cxx
-@@ -637,7 +637,10 @@
+@@ -647,7 +647,10 @@
  ::ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk)
  {
    std::string output = "";
 -  output.append(chunk.begin(), chunk.end());
 +  for (size_t i = 0; i < chunk.size(); i += 1)
 +    {
-+      output += chunk[i];
++    output += chunk[i];
 +    }
  
    if(output.find("<cdash") != output.npos)
@@ -288,15 +318,6 @@ BLD_CMAKE() {
    if ( !file )
      {
      std::string error = "Internal CMake error when trying to open file: ";
---- Modules/Platform/Linux.cmake.orig
-+++ Modules/Platform/Linux.cmake
-@@ -55,3 +55,6 @@
- if(EXISTS "/etc/debian_version")
-   set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
- endif()
-+
-+set(CMAKE_C_STANDARD_LIBRARIES_INIT "-lm")
-+set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 --- Utilities/cmjsoncpp/src/lib_json/json_value.cpp.orig
 +++ Utilities/cmjsoncpp/src/lib_json/json_value.cpp
 @@ -461,7 +461,10 @@
@@ -317,31 +338,26 @@ EOF
   make install
 }
 
-VER_SWIG="3.0.6"
-DIR_SWIG="swig-rel-$VER_SWIG"
+VER_SWIG="3.0.8"
+DIR_SWIG="swig-$VER_SWIG"
 SRC_SWIG="$DIR_SWIG.tar.gz"
-URL_SWIG="https://github.com/swig/swig/archive/rel-$VER_SWIG.tar.gz"
-GET_SWIG() {
-  wget -O - "$URL_SWIG" | tar -zx
-  cd "$DIR_SWIG"
-  ./autogen.sh 1>&2
-  tar -C .. -zc "$DIR_SWIG"
-}
+URL_SWIG="http://downloads.sourceforge.net/project/swig/swig/$DIR_SWIG/$SRC_SWIG"
+CHK_SWIG="58a475dbbd4a4d7075e5fe86d4e54c9edde39847cdb96a3053d87cb64a23a453"
+SUM_SWIG="sha256"
 BLD_SWIG() {
   ./configure "--prefix=$INSTALL_DIR"
   make
-  touch CCache/ccache-swig.1
   make install
 }
 
-VER_NFQUEUE_BINDINGS="0.5"
+VER_NFQUEUE_BINDINGS="ca0fe77e5deb25a26baa4dbca3299102b31601ee"
 RPO_NFQUEUE_BINDINGS="https://github.com/chifflier/nfqueue-bindings.git"
 DIR_NFQUEUE_BINDINGS="nfqueue-bindings-$VER_NFQUEUE_BINDINGS"
 SRC_NFQUEUE_BINDINGS="$DIR_NFQUEUE_BINDINGS.tar.gz"
 GET_NFQUEUE_BINDINGS() {
   git clone "$RPO_NFQUEUE_BINDINGS" "$DIR_NFQUEUE_BINDINGS"
   cd "$DIR_NFQUEUE_BINDINGS"
-  git checkout "nfqueue-bindings-$VER_NFQUEUE_BINDINGS"
+  git checkout "$VER_NFQUEUE_BINDINGS"
   tar -C .. -zc "$DIR_NFQUEUE_BINDINGS"
 }
 BLD_NFQUEUE_BINDINGS() {
@@ -361,15 +377,41 @@ BLD_NFQUEUE_BINDINGS() {
  
 --- python/libnetfilter_queue_python.i.orig
 +++ python/libnetfilter_queue_python.i
-@@ -55,7 +55,7 @@
+@@ -9,7 +9,6 @@
+ }
+ 
+ %{
+-#include <arpa/inet.h>
+ #include <linux/netfilter.h>
+ #include <linux/ip.h>
+ 
+@@ -59,7 +58,7 @@
                  p->qh = qh;
                  p->nfad = nfad;
                  payload_obj = SWIG_NewPointerObj((void*) p, SWIGTYPE_p_payload, 0 /* | SWIG_POINTER_OWN */);
 -                arglist = Py_BuildValue("(N)",payload_obj);
-+                arglist = Py_BuildValue("(i,O)",42,payload_obj);
++                arglist = Py_BuildValue("(i,O)",payload_obj);
                  result = PyEval_CallObject(func,arglist);
+                 free(p);
                  Py_DECREF(arglist);
-                 if (result) {
+--- nfq_common.c.orig
++++ nfq_common.c
+@@ -1,4 +1,4 @@
+-#include <arpa/inet.h>
++#include <stddef.h>
+ #include <linux/netfilter.h>
+ #include <linux/ip.h>
+ #include <linux/socket.h>
+--- CMakeLists.txt.orig
++++ CMakeLists.txt
+@@ -30,7 +30,6 @@
+ CHECK_FUNCTION_EXISTS(nfq_set_verdict2 HAVE_NFQ_SET_VERDICT2)
+ 
+ ADD_SUBDIRECTORY(python)
+-ADD_SUBDIRECTORY(perl)
+ 
+ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/nfq_version.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/nfq_version.h)
 EOF
   make PREFIX="$INSTALL_DIR" install
 }
@@ -377,42 +419,37 @@ EOF
 VER_PYINOTIFY="0.9.6"
 DIR_PYINOTIFY="pyinotify-$VER_PYINOTIFY"
 SRC_PYINOTIFY="$DIR_PYINOTIFY.tar.gz"
-URL_PYINOTIFY="https://github.com/seb-m/pyinotify/archive/$VER_PYINOTIFY.tar.gz"
-CHK_PYINOTIFY="7943f198c5cef2bdc121d847937fbe565daaa7d4daaf1b8de8ef5689812f481c"
-SUM_PYINOTIFY="sha256"
+GET_PYINOTIFY() {
+  mkdir "$DIR_PYINOTIFY"
+  pip install --download "$DIR_PYINOTIFY" "pyinotify==$VER_PYINOTIFY" 1>&2
+  tar -zc "$DIR_PYINOTIFY"
+}
 BLD_PYINOTIFY() {
-  python setup.py install
+  pip install --no-index --find-links=. pyinotify
 }
 
 VER_DNSPYTHON="1.12.0"
 DIR_DNSPYTHON="dnspython-$VER_DNSPYTHON"
 SRC_DNSPYTHON="$DIR_DNSPYTHON.tar.gz"
-URL_DNSPYTHON="https://github.com/rthalley/dnspython/archive/v$VER_DNSPYTHON.tar.gz"
-CHK_DNSPYTHON="4ff0ef1f8de9c893b3885c861eca10eafc1f0dd1535b916787549a7a612ba299"
-SUM_DNSPYTHON="sha256"
+GET_DNSPYTHON() {
+  mkdir "$DIR_DNSPYTHON"
+  pip install --download "$DIR_DNSPYTHON" "dnspython==$VER_DNSPYTHON" 1>&2
+  tar -zc "$DIR_DNSPYTHON"
+}
 BLD_DNSPYTHON() {
-  python setup.py install
+  pip install --no-index --find-links=. dnspython
 }
 
 VER_PYTHON_IPY="0.83"
-DIR_PYTHON_IPY="python-ipy-IPy-$VER_PYTHON_IPY"
+DIR_PYTHON_IPY="python-ipy-$VER_PYTHON_IPY"
 SRC_PYTHON_IPY="python-ipy-$VER_PYTHON_IPY.tar.gz"
-URL_PYTHON_IPY="https://github.com/autocracy/python-ipy/archive/IPy-$VER_PYTHON_IPY.tar.gz"
-CHK_PYTHON_IPY="d8494e6f2c1be5f07a76d9c65b789a755bf903d6badaea633511bdf3fdc160ea"
-SUM_PYTHON_IPY="sha256"
-BLD_PYTHON_IPY() {
-  python setup.py install
+GET_PYTHON_IPY() {
+  mkdir "$DIR_PYTHON_IPY"
+  pip install --download "$DIR_PYTHON_IPY" "IPy==$VER_PYTHON_IPY" 1>&2
+  tar -zc "$DIR_PYTHON_IPY"
 }
-
-VER_LIBCAP_NG="0.7.7"
-DIR_LIBCAP_NG="libcap-ng-$VER_LIBCAP_NG"
-SRC_LIBCAP_NG="$DIR_LIBCAP_NG.tar.gz"
-URL_LIBCAP_NG="https://people.redhat.com/sgrubb/libcap-ng/$SRC_LIBCAP_NG"
-CHK_LIBCAP_NG="615549ce39b333f6b78baee0c0b4ef18bc726c6bf1cca123dfd89dd963f6d06b"
-SUM_LIBCAP_NG="sha256"
-BLD_LIBCAP_NG() {
-  ./configure "--prefix=$INSTALL_DIR" --with-python --without-python3
-  make
+BLD_PYTHON_IPY() {
+  pip install --no-index --find-links=. IPy
 }
 
 VER_TCPDUMP="4.7.4"
@@ -427,46 +464,59 @@ BLD_TCPDUMP() {
   make install
 }
 
-VER_SCAPY="2.3.1"
+VER_SCAPY="2.3.2"
 DIR_SCAPY="scapy-$VER_SCAPY"
-SRC_SCAPY="$DIR_SCAPY.zip"
-URL_SCAPY="https://bitbucket.org/secdev/scapy/downloads/$SRC_SCAPY"
-CHK_SCAPY="8972c02e39a826a10c02c2bdd5025f7251dce9589c57befd9bb55c65f02e4934"
-SUM_SCAPY="sha256"
+SRC_SCAPY="$DIR_SCAPY.tar.gz"
+GET_SCAPY() {
+  mkdir "$DIR_SCAPY"
+  pip install --download "$DIR_SCAPY" "scapy==$VER_SCAPY" 1>&2
+  tar -zc "$DIR_SCAPY"
+}
 BLD_SCAPY() {
-  python setup.py install
+  pip install --no-index --find-links=. scapy
 }
 
-VER_PYTHON_SIX="1.9.0"
-DIR_PYTHON_SIX="six-$VER_PYTHON_SIX"
-SRC_PYTHON_SIX="$DIR_PYTHON_SIX.tar.gz"
-URL_PYTHON_SIX="https://pypi.python.org/packages/source/s/six/$SRC_PYTHON_SIX"
-CHK_PYTHON_SIX="e24052411fc4fbd1f672635537c3fc2330d9481b18c0317695b46259512c91d5"
-SUM_PYTHON_SIX="sha256"
-BLD_PYTHON_SIX() {
-  python setup.py install
+VER_LIBCAP_NG="0.7.7"
+DIR_LIBCAP_NG="libcap-ng-$VER_LIBCAP_NG"
+SRC_LIBCAP_NG="$DIR_LIBCAP_NG.tar.gz"
+URL_LIBCAP_NG="https://people.redhat.com/sgrubb/libcap-ng/$SRC_LIBCAP_NG"
+CHK_LIBCAP_NG="615549ce39b333f6b78baee0c0b4ef18bc726c6bf1cca123dfd89dd963f6d06b"
+SUM_LIBCAP_NG="sha256"
+BLD_LIBCAP_NG() {
+  ./configure "--prefix=$INSTALL_DIR" --with-python --without-python3
+  make
+  make install
 }
 
 VER_PYTHON_CONFIGOBJ="5.0.6"
 DIR_PYTHON_CONFIGOBJ="configobj-$VER_PYTHON_CONFIGOBJ"
 SRC_PYTHON_CONFIGOBJ="$DIR_PYTHON_CONFIGOBJ.tar.gz"
-URL_PYTHON_CONFIGOBJ="https://pypi.python.org/packages/source/c/configobj/$SRC_PYTHON_CONFIGOBJ"
-CHK_PYTHON_CONFIGOBJ="a2f5650770e1c87fb335af19a9b7eb73fc05ccf22144eb68db7d00cd2bcb0902"
-SUM_PYTHON_CONFIGOBJ="sha256"
+GET_PYTHON_CONFIGOBJ() {
+  mkdir "$DIR_PYTHON_CONFIGOBJ"
+  pip install --download "$DIR_PYTHON_CONFIGOBJ" "configobj==$VER_PYTHON_CONFIGOBJ" 1>&2
+  tar -zc "$DIR_PYTHON_CONFIGOBJ"
+}
 BLD_PYTHON_CONFIGOBJ() {
-  python setup.py install
+  pip install --no-index --find-links=. configobj
 }
 
-VER_NFDHCPD="3e5119640ced6ffe4e528a3c1664db9d09286140"
+VER_NFDHCPD="1000f2765a58c1c37ae7430ad6305de4fbd98344"
 DIR_NFDHCPD="nfdhcpd-$VER_NFDHCPD"
 SRC_NFDHCPD="$DIR_NFDHCPD.tar.gz"
 URL_NFDHCPD="https://github.com/davedoesdev/nfdhcpd/archive/$VER_NFDHCPD.tar.gz"
-CHK_NFDHCPD="ae1cb1f85f4ed3d75517e79a9576fec6f05dfa6e0e015305efc6988f84a2ddb4"
+CHK_NFDHCPD="f6f5b9444fa354cf39a35e2edbda1712d067feaeadae1501aad25116850661a0"
 SUM_NFDHCPD="sha256"
 BLD_NFDHCPD() {
   sed 's/nobody/nfdhcpd/' nfdhcpd.conf > "$INSTALL_DIR/etc/nfdhcpd.conf"
   cp nfdhcpd "$INSTALL_DIR/sbin"
 }
+
+
+
+
+
+
+
 
 VER_EBTABLES="2.0.10-4"
 DIR_EBTABLES="ebtables-v$VER_EBTABLES"
@@ -639,21 +689,20 @@ BLD_SALT() {
 }
 
 PACKAGES=("${PACKAGES[@]}"
-          WEAVE)
-#          PYTHON_LOCKFILE
-#          PYTHON_DAEMON
-#          CMAKE
-#          SWIG
-#          NFQUEUE_BINDINGS
-#          PYINOTIFY
-#          DNSPYTHON
-#          PYTHON_IPY
-#          LIBCAP_NG
-#          TCPDUMP
-#          SCAPY
-#          PYTHON_SIX
-#          PYTHON_CONFIGOBJ
-#          NFDHCPD
+          WEAVE
+          PYTHON_DAEMON
+          CMAKE
+          SWIG
+          NFQUEUE_BINDINGS
+          PYINOTIFY
+          DNSPYTHON
+          PYTHON_IPY
+          TCPDUMP
+          SCAPY
+          LIBCAP_NG
+          PYTHON_CONFIGOBJ
+          NFDHCPD)
+
 #          EBTABLES
 #          FOLD
 #          LIBYAML

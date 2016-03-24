@@ -20,7 +20,7 @@ When Dobby runs `salt-minion`, it displays the minion's ID and public key finger
 
 Weave creates a virtual network between Docker containers and, with Fold, between virtual machines.
 
-Dobby runs `weave` with default configuration. To run `weave` with different arguments, edit `chroot/service/weave/run`.
+Dobby runs `weave` with default configuration. To run `weave` with different arguments, edit `xroot/service/weave/run`.
 
 ### Fold
 
