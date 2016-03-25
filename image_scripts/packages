@@ -574,25 +574,11 @@ PST_FOLD() {
   export NFDHCPD_CFG="$INSTALL_DIR/etc/nfdhcpd.conf"
 }
 
-
-
-VER_LIBYAML="0.1.6"
-DIR_LIBYAML="yaml-$VER_LIBYAML"
-SRC_LIBYAML="$DIR_LIBYAML.tar.gz"
-URL_LIBYAML="http://pyyaml.org/download/libyaml/$SRC_LIBYAML"
-CHK_LIBYAML="7da6971b4bd08a986dd2a61353bc422362bd0edcc67d7ebaac68c95f74182749"
-SUM_LIBYAML="sha256"
-BLD_LIBYAML() {
-  ./configure "--prefix=$INSTALL_DIR"
-  make
-  make install
-}
-
-VER_LIBSODIUM="1.0.3"
+VER_LIBSODIUM="1.0.8"
 DIR_LIBSODIUM="libsodium-$VER_LIBSODIUM"
 SRC_LIBSODIUM="$DIR_LIBSODIUM.tar.gz"
 URL_LIBSODIUM="https://download.libsodium.org/libsodium/releases/$SRC_LIBSODIUM"
-CHK_LIBSODIUM="cbcfc63cc90c05d18a20f229a62c7e7054a73731d0aa858c0517152c549b1288"
+CHK_LIBSODIUM="c0f191d2527852641e0a996b7b106d2e04cbc76ea50731b2d0babd3409301926"
 SUM_LIBSODIUM="sha256"
 BLD_LIBSODIUM() {
   ./configure "--prefix=$INSTALL_DIR"
@@ -600,11 +586,11 @@ BLD_LIBSODIUM() {
   make install
 }
 
-VER_ZEROMQ="4.1.2"
+VER_ZEROMQ="4.1.4"
 DIR_ZEROMQ="zeromq-$VER_ZEROMQ"
 SRC_ZEROMQ="$DIR_ZEROMQ.tar.gz"
 URL_ZEROMQ="http://download.zeromq.org/$SRC_ZEROMQ"
-CHK_ZEROMQ="f9162ead6d68521e5154d871bac304f88857308bb02366b81bb588497a345927"
+CHK_ZEROMQ="e99f44fde25c2e4cb84ce440f87ca7d3fe3271c2b8cfbc67d55e4de25e6fe378"
 SUM_ZEROMQ="sha256"
 BLD_ZEROMQ() {
   patch -p0 << 'EOF'
@@ -666,6 +652,18 @@ EOF
   make install
 }
 
+VER_LIBYAML="0.1.6"
+DIR_LIBYAML="yaml-$VER_LIBYAML"
+SRC_LIBYAML="$DIR_LIBYAML.tar.gz"
+URL_LIBYAML="http://pyyaml.org/download/libyaml/$SRC_LIBYAML"
+CHK_LIBYAML="7da6971b4bd08a986dd2a61353bc422362bd0edcc67d7ebaac68c95f74182749"
+SUM_LIBYAML="sha256"
+BLD_LIBYAML() {
+  ./configure "--prefix=$INSTALL_DIR"
+  make
+  make install
+}
+
 VER_DMIDECODE="3.0"
 DIR_DMIDECODE="dmidecode-$VER_DMIDECODE"
 SRC_DMIDECODE="$DIR_DMIDECODE.tar.xz"
@@ -689,22 +687,16 @@ BLD_VIRT_WHAT() {
   make install
 }
 
-VER_SALT="2015.8.0"
+VER_SALT="2015.8.8"
 DIR_SALT="salt-$VER_SALT"
 SRC_SALT="$DIR_SALT.tar.gz"
-URL_SALT="https://pypi.python.org/packages/source/s/salt/$SRC_SALT"
 GET_SALT() {
-  wget -O - "$URL_SALT" | tar -zx
-  cd "$DIR_SALT"
-  mkdir downloads
-  pip install --download downloads -r requirements/zeromq.txt 1>&2
-  pip install --download downloads psutil 1>&2
-  tar -C .. -zc "$DIR_SALT"
+  mkdir "$DIR_SALT"
+  pip install --download "$DIR_SALT" "salt==$VER_SALT" 1>&2
+  tar -zc "$DIR_SALT"
 }
 BLD_SALT() {
-  pip install --no-index --find-links=downloads -r requirements/zeromq.txt
-  pip install --no-index --find-links=downloads psutil
-  python setup.py install
+  pip install --no-index --find-links=. salt
 }
 
 PACKAGES=("${PACKAGES[@]}"
@@ -722,10 +714,10 @@ PACKAGES=("${PACKAGES[@]}"
           PYTHON_CONFIGOBJ
           NFDHCPD
           EBTABLES
-          FOLD)
-#          LIBYAML
-#          LIBSODIUM
-#          ZEROMQ
-#          DMIDECODE
-#          VIRT_WHAT
-#          SALT)
+          FOLD
+          LIBSODIUM
+          ZEROMQ
+          LIBYAML
+          DMIDECODE
+          VIRT_WHAT
+          SALT)
