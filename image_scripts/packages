@@ -511,13 +511,6 @@ BLD_NFDHCPD() {
   cp nfdhcpd "$INSTALL_DIR/sbin"
 }
 
-
-
-
-
-
-
-
 VER_EBTABLES="2.0.10-4"
 DIR_EBTABLES="ebtables-v$VER_EBTABLES"
 SRC_EBTABLES="$DIR_EBTABLES.tar.gz"
@@ -525,6 +518,30 @@ URL_EBTABLES="ftp://ftp.netfilter.org/pub/ebtables/$SRC_EBTABLES"
 CHK_EBTABLES="dc6f7b484f207dc712bfca81645f45120cb6aee3380e77a1771e9c34a9a4455d"
 SUM_EBTABLES="sha256"
 BLD_EBTABLES() {
+  # Fix type redefinitions
+  patch -p0 << 'EOF'
+--- Makefile.orig
++++ Makefile
+@@ -17,7 +17,7 @@
+ SYSCONFIGDIR:=/etc/sysconfig
+ DESTDIR:=
+ 
+-CFLAGS:=-Wall -Wunused -Werror
++CFLAGS:=-Wall -Wunused -Werror -D__THROW= -D_LINUX_IN_H -D_LINUX_IN6_H -D_LINUX_IF_ETHER_H
+ CFLAGS_SH_LIB:=-fPIC -O3
+ CC:=gcc
+ 
+--- include/ebtables_u.h.orig
++++ include/ebtables_u.h
+@@ -24,6 +24,7 @@
+ #ifndef EBTABLES_U_H
+ #define EBTABLES_U_H
+ #include <netinet/in.h>
++#include <netinet/ether.h>
+ #include <linux/netfilter_bridge/ebtables.h>
+ #include <linux/netfilter/x_tables.h>
+ 
+EOF
   make "MANDIR=$INSTALL_DIR/man" \
        "ETCDIR=$INSTALL_DIR/etc" \
        "BINDIR=$INSTALL_DIR/sbin" \
@@ -556,6 +573,8 @@ EOF
 PST_FOLD() {
   export NFDHCPD_CFG="$INSTALL_DIR/etc/nfdhcpd.conf"
 }
+
+
 
 VER_LIBYAML="0.1.6"
 DIR_LIBYAML="yaml-$VER_LIBYAML"
@@ -701,10 +720,9 @@ PACKAGES=("${PACKAGES[@]}"
           SCAPY
           LIBCAP_NG
           PYTHON_CONFIGOBJ
-          NFDHCPD)
-
-#          EBTABLES
-#          FOLD
+          NFDHCPD
+          EBTABLES
+          FOLD)
 #          LIBYAML
 #          LIBSODIUM
 #          ZEROMQ
