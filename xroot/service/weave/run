@@ -4,5 +4,10 @@ set -e
 docker history "weaveworks/weave:$VER_WEAVE" && ! docker history weaveworks/weave:latest
 docker history "weaveworks/weaveexec:$VER_WEAVE" && ! docker history weaveworks/weaveexec:latest
 docker history "weaveworks/plugin:$VER_WEAVE" && ! docker history weaveworks/plugin:latest
+# Docker re-launches at boot but 'weave launch' returns an error because it
+# says there's an existing container running with different arguments.
+# The different argument is the container name (not nickname), which is
+# the bridge MAC address. So stop the existing container to fix 'weave launch'
+weave stop-router || true
 weave launch
 exec docker wait weave
