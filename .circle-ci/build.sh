@@ -7,6 +7,7 @@ if [ "$version" = master -o "$version" = HEAD ]; then
 fi
 echo "version: $version"
 
+# Prevent parted waiting for udevadm settle
 sudo ln -sf /bin/true /sbin/udevadm
 
 export HEDDLE_EXT_DIR="$PWD"
@@ -20,6 +21,8 @@ sed -i -e 's/-enable-kvm//' build/system-image-x86_64/run-emulator.sh
 ../heddle/image_scripts/make_build_and_home_images.sh
 
 (
+sudo mkdir /dist
+
 e2extract() {
   e2ls -l "$1:$3" | while read -r l; do
     if [ -n "$l" ]; then
@@ -39,7 +42,7 @@ e2extract() {
   done
 }
 srcp="dobby-$version-src-x86_64"
-srcf="/$srcp.tar"
+srcf="/dist/$srcp.tar"
 
 cd ../downloads
 sudo bsdtar -s "@^@$srcp/@" -cf "$srcf" aboriginal-*.tar.gz
@@ -109,8 +112,8 @@ fi
 
 logf="dobby-$version-log-x86_64.txt"
 # If $home isn't for this version, it won't contain $logf
-sudo tar -zxf "$homef" -C / "$logf"
-sudo xz "/$logf"
+sudo tar -zxf "$homef" -C /dist "$logf"
+sudo xz "/dist/$logf"
 
 e2cp -P 400 -O 0 -G 0 "$homef" ../gen/x86_64/images/home.img:home.tar.gz
 rm -f "$homef"
@@ -123,11 +126,12 @@ prepare_and_dist() {
   ../heddle/aboriginal_scripts/run_heddle.sh -p -q          || return 1
   ../heddle/image_scripts/make_dist_and_heddle_images.sh -l || return 1
   ../heddle/aboriginal_scripts/dist_heddle.sh -q -r         || return 1
-  sudo bsdtar -C .. -s "/^\./$prefix/" -JLcf "/$prefix.tar.xz" ./gen/x86_64/dist
+  sudo bsdtar -C .. -s "/^\./$prefix/" --exclude update -JLcf "/dist/$prefix.tar.xz" ./gen/x86_64/dist
+  sudo bsdtar -C .. -s "/^\./$prefix/" -JLcf "/dist/$prefix-update.tar.xz" ./gen/x86_64/dist/update
 }
 prepare_and_dist gpt-btrfs
-#prepare_and_dist gpt-ext4 -e
-#prepare_and_dist mbr-btrfs -m
-#prepare_and_dist mbr-ext4 '-m -e'
+prepare_and_dist gpt-ext4 -e
+prepare_and_dist mbr-btrfs -m
+prepare_and_dist mbr-ext4 '-m -e'
 
-ls -lh /dobby*
+ls -lh /dist
