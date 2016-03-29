@@ -8,7 +8,6 @@ fi
 echo "version: $version"
 
 export HEDDLE_EXT_DIR="$PWD"
-git clone 'https://github.com/davedoesdev/heddle.git'
 
 cd aboriginal-*
 ( while true; do echo keep alive!; sleep 60; done ) &
