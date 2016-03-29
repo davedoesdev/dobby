@@ -7,7 +7,7 @@ ls downloads
 
 ver_abo=1.4.5
 ver_bat=6.0.2
-ver_home=17de411f6fda6a6293e64611fd8b20a5de246c7f
+ver_home=c9e38c69e8178f61930b77f241b6265e4830d447
 
 bat_base="downloads/build-aboriginal-$ver_abo-dobby-x86_64-$ver_bat"
 bat_seal="$bat_base.seal"
@@ -34,8 +34,7 @@ mv dobby/gen/build.img gen
 rm -rf dobby
 git clone 'https://github.com/davedoesdev/heddle.git'
 (cd heddle && git checkout "$ver_home")
-bsdtar -C /tmp -zxf "$home_file"
-mv /tmp/home /tmp/heddle_home
+bsdtar -C heddle -zxf "$home_file"
 
 find downloads -mindepth 1 -not -path "$bat_base.*" -not -path "$home_base.*" -exec rm -v {} \;
 echo -downloads:
