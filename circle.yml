@@ -1,16 +1,14 @@
 test:
   override:
     - .circle-ci/build.sh
-general:
-  artifacts:
-    - "/dobby-*.tar.xz"
-    - "/dobby-*-log-*.txt.xz"
-    - "/dobby-*-src-*.tar"
 machine:
   node:
-    version: 0.12
+    version: "4.3.0"
 dependencies:
   cache_directories:
     - downloads
   pre:
     - .circle-ci/deps.sh
+general:
+  artifacts:
+    - "/dist"
