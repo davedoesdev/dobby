@@ -11,7 +11,6 @@ echo "version: $version"
 sudo ln -sf /bin/true /sbin/udevadm
 
 export HEDDLE_EXT_DIR="$PWD"
-git clone 'https://github.com/davedoesdev/heddle.git'
 
 cd aboriginal-*
 sed -i -e 's/-enable-kvm//' build/system-image-x86_64/run-emulator.sh

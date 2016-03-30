@@ -18,6 +18,7 @@ ls downloads
 
 ver_abo=1.4.5
 ver_bat=6.0.2
+ver_home=af155d650dab6ca255e5e245a6644b0b2a756c56
 
 abo_base="downloads/aboriginal-$ver_abo"
 abo_seal="$abo_base.seal"
@@ -37,11 +38,13 @@ if [ ! -f "$bat_seal" ]; then
   touch "$bat_seal"
 fi
 
-rm -rf aboriginal-* dobby
+rm -rf aboriginal-* heddle dobby
 bsdtar -Jxf "$bat_file"
 mkdir gen
 mv dobby/gen/build.img gen
 rm -rf dobby
+git clone 'https://github.com/davedoesdev/heddle.git'
+(cd heddle && git checkout "$ver_home")
 
 find downloads -mindepth 1 -not -path "$abo_base.*" -not -path "$bat_base.*" -exec rm -v {} \;
 echo -downloads:
