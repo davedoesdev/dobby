@@ -18,7 +18,7 @@ ls downloads
 
 ver_abo=1.4.5
 ver_bat=6.0.2
-ver_home=af155d650dab6ca255e5e245a6644b0b2a756c56
+ver_home=af83a57859afbec1ff3adc8961ce559e4c304d26
 
 abo_base="downloads/aboriginal-$ver_abo"
 abo_seal="$abo_base.seal"

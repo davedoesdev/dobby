@@ -1,5 +1,8 @@
 #!/bin/sh
 exec 2>&1
+if grep -q 'heddle_prepare=1' /proc/cmdline; then
+  exec sv down weave
+fi
 set -e
 docker history "weaveworks/weave:$VER_WEAVE" && ! docker history weaveworks/weave:latest
 docker history "weaveworks/weaveexec:$VER_WEAVE" && ! docker history weaveworks/weaveexec:latest
