@@ -7,7 +7,7 @@ ls downloads
 
 ver_abo=1.4.5
 ver_bat=6.0.2
-ver_home=af83a57859afbec1ff3adc8961ce559e4c304d26
+ver_home=21b6ff7abf7f60fec0d70e8d38e462186c6c6e02
 
 bat_base="downloads/build-aboriginal-$ver_abo-dobby-x86_64-$ver_bat"
 bat_seal="$bat_base.seal"
